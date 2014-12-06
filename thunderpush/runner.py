@@ -39,10 +39,10 @@ def run_app():
 
     application = tornado.web.Application(urls, settings.DEBUG)
 
-    ss = SortingStation()
+    ss = SortingStation(settings.SECRETURL, settings.TOKEN)
 
     # Single-client only at the moment.
-    ss.create_messenger(settings.APIKEY, settings.APISECRET)
+    # ss.create_messenger(settings.APIKEY, settings.APISECRET)
 
     logger.info("Starting Thunderpush server at %s:%d",
         settings.HOST, settings.PORT)
@@ -64,8 +64,8 @@ def update_settings(args):
         if not value is None:
             setattr(settings, optname, value)
 
-    settings.APIKEY = args['clientkey']
-    settings.APISECRET = args['apikey']
+    settings.SECRETURL = args['secreturl']
+    settings.TOKEN = args['token']
 
 
 def parse_args(args):
@@ -94,11 +94,11 @@ def parse_args(args):
     parser.add_argument('-V', '--version', 
         action='version', version=__version__)
 
-    parser.add_argument('clientkey',
-        help='client key')
+    parser.add_argument('secreturl',
+        help='url to verify apikey')
 
-    parser.add_argument('apikey',
-        help='server API key')
+    parser.add_argument('token',
+        help='token to conection and verify apikey')
 
     return parser.parse_args(args)
 
