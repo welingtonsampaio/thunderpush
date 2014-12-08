@@ -1,4 +1,5 @@
 import logging
+import re
 
 from sockjs.tornado import SockJSConnection
 from thunderpush.sortingstation import SortingStation
@@ -85,8 +86,12 @@ class ThunderSocketHandler(SockJSConnection):
 
         channels = filter(None, args.split(":"))
 
+        # not subscribe in private channel, only backend connection
+        prv = re.compile("^private\-")
+
         for channel in channels:
-            self.messenger.subscribe_user_to_channel(self, channel)
+            if not prv.search(channel):
+                self.messenger.subscribe_user_to_channel(self, channel)
 
     def handle_unsubscribe(self, args):
         if not self.connected:

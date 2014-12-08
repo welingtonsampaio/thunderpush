@@ -17,7 +17,7 @@ def is_authenticated(f):
         ss = SortingStation.instance()
 
         apisecret = self.request.headers.get('X-Thunder-Secret-Key', None)
-        messenger = ss.get_messenger_by_apikey(kwargs['apikey'])
+        messenger = ss.get_or_create_messenger_by_apikey(kwargs['apikey'])
 
         if not messenger or apisecret != messenger.apisecret:
             self.error("Wrong API key/secret.", 401)
@@ -92,6 +92,28 @@ class ChannelHandler(ThunderApiHandler):
             [user.userid for user in messenger.get_users_in_channel(channel)]
 
         self.response({"users": users})
+
+
+class PrivateChannelHandler(ThunderApiHandler):
+    @is_authenticated
+    @is_json
+    def post(self, *args, **kwargs):
+        """ Include user to private channel """
+
+        messenger = kwargs['messenger']
+        channel = kwargs['channel']
+
+        try:
+            content_parsed = json.loads(self.request.body)
+            user = messenger.users.get(content_parsed.get('user'), 0)
+            count = messenger.subscribe_user_to_channel(user, channel)
+            self.response({"count": messenger.get_channel_user_count(channel)})
+
+            logger.debug("Message has been sent to %d users." % count)
+        except KeyError:
+            self.error("Request has no user.", 400)
+            return
+
 
 class EventHandler(ThunderApiHandler):
     @is_authenticated
