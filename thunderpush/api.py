@@ -93,28 +93,6 @@ class ChannelHandler(ThunderApiHandler):
 
         self.response({"users": users})
 
-
-class PrivateChannelHandler(ThunderApiHandler):
-    @is_authenticated
-    @is_json
-    def post(self, *args, **kwargs):
-        """ Include user to private channel """
-
-        messenger = kwargs['messenger']
-        channel = kwargs['channel']
-
-        try:
-            content_parsed = json.loads(self.request.body)
-            user = messenger.users.get(content_parsed.get('user'), 0)
-            count = messenger.subscribe_user_to_channel(user, channel)
-            self.response({"count": messenger.get_channel_user_count(channel)})
-
-            logger.debug("Message has been sent to %d users." % count)
-        except KeyError:
-            self.error("Request has no user.", 400)
-            return
-
-
 class EventHandler(ThunderApiHandler):
     @is_authenticated
     @is_json
