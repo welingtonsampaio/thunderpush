@@ -1,4 +1,4 @@
-from thunderpush.sortingstation import SortingStation
+from thunderpush.sortingstation import SortingStation, StationMongo
 from thunderpush.handler import ThunderSocketHandler
 from thunderpush import api, __version__
 from thunderpush import settings
@@ -20,6 +20,7 @@ def run_app():
     else:
         logger.setLevel(logging.INFO)
 
+
     ThunderRouter = SockJSRouter(ThunderSocketHandler, "/connect")
 
     # api urls
@@ -39,7 +40,8 @@ def run_app():
 
     application = tornado.web.Application(urls, settings.DEBUG)
 
-    ss = SortingStation(settings.SECRETURL, settings.TOKEN)
+    ss = SortingStation()
+    sr = StationMongo(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB, settings.MONGO_TABLE, settings.MONGO_PUBLIC, settings.MONGO_SECRET)
 
     # Single-client only at the moment.
     # ss.create_messenger(settings.APIKEY, settings.APISECRET)
@@ -58,14 +60,11 @@ def run_app():
 def update_settings(args):
     args = vars(args)
 
-    for optname in ["PORT", "HOST", "VERBOSE", "DEBUG"]:
+    for optname in ["PORT", "HOST", "VERBOSE", "DEBUG", "MONGO_HOST", "MONGO_PORT", "MONGO_DB", "MONGO_TABLE", "MONGO_PUBLIC", "MONGO_SECRET"]:
         value = args.get(optname, None)
 
         if not value is None:
             setattr(settings, optname, value)
-
-    settings.SECRETURL = args['secreturl']
-    settings.TOKEN = args['token']
 
 
 def parse_args(args):
@@ -91,14 +90,38 @@ def parse_args(args):
         help='debug mode (useful for development)',
         action="store_true", dest="DEBUG")
 
+    parser.add_argument('-mh', '--mongo-host',
+        default=settings.MONGO_HOST,
+        help='Hostname of Mongo database',
+        action="store", dest="MONGO_HOST")
+
+    parser.add_argument('-mp', '--mongo-port',
+        default=settings.MONGO_PORT,
+        help='Port to Mongo connection',
+        action="store", dest="MONGO_PORT")
+
+    parser.add_argument('-md', '--mongo-db',
+        default=settings.MONGO_DB,
+        help='Database Mongo collection',
+        action="store", dest="MONGO_DB")
+
+    parser.add_argument('-mt', '--mongo-table',
+        default=settings.MONGO_TABLE,
+        help='DB Mongo number',
+        action="store", dest="MONGO_TABLE")
+
+    parser.add_argument('-mpk', '--mongo-public',
+        default=settings.MONGO_PUBLIC,
+        help='Public field in Mongo collection',
+        action="store", dest="MONGO_PUBLIC")
+
+    parser.add_argument('-msk', '--mongo-secret',
+        default=settings.MONGO_SECRET,
+        help='Secret field in Mongo collection',
+        action="store", dest="MONGO_SECRET")
+
     parser.add_argument('-V', '--version', 
         action='version', version=__version__)
-
-    parser.add_argument('secreturl',
-        help='url to verify apikey')
-
-    parser.add_argument('token',
-        help='token to conection and verify apikey')
 
     return parser.parse_args(args)
 

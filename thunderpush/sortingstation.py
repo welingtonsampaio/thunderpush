@@ -1,6 +1,12 @@
 import logging
-import requests
+# import requests
+from pymongo import MongoClient
 from thunderpush.messenger import Messenger
+
+# try:
+#     import simplejson as json
+# except ImportError:
+#     import json
 
 logger = logging.getLogger()
 
@@ -10,14 +16,11 @@ class SortingStation(object):
 
     _instance = None
 
-    def __init__(self, host, token, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         if self._instance:
             raise Exception("SortingStation already initialized.")
 
         self.messengers_by_apikey = {}
-
-        self.host = host
-        self.token = token
 
         SortingStation._instance = self
 
@@ -41,10 +44,41 @@ class SortingStation(object):
         if messenger:
             return messenger
         else:
-            payload = {'token': self.token, 'apikey': apikey}
-            r = requests.post(self.host, params=payload)
-            if r.status_code == 200:
-                self.create_messenger(apikey, r.text)
+            sr = StationMongo.instance()
+            secret_key = sr.from_apikey(apikey)
+            if secret_key:
+                self.create_messenger(apikey, secret_key)
                 return self.get_messenger_by_apikey(apikey)
             else:
                 return None
+
+class StationMongo:
+
+    _instance = None
+
+    def __init__(self, hostname, port, db, table, public, secret):
+        if self._instance:
+            raise Exception("StationRedis already initialized.")
+
+        self.table = table
+        self.public = public
+        self.secret = secret
+
+        client = MongoClient(hostname, port)
+        self.db = client[db]
+        StationMongo._instance = self
+
+    @staticmethod
+    def instance():
+        return StationMongo._instance
+
+    def from_apikey(self, apikey):
+        table = self.db[self.table]
+        content = table.find_one({self.public+"": apikey})
+        if not content:
+            return None
+        # data = json.loads(content)
+        if self.secret in content:
+            return content[self.secret]
+        else:
+            return None

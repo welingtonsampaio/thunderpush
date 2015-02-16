@@ -5,12 +5,6 @@
 # Although Thunderpush server supports multiple server clients,
 # at the moment we make it single-client.
 
-# Public API key for server client.
-APIKEY = ''
-
-# Private, secret API key for server client.
-APISECRET = ''
-
 # Port to which the server will be bound.
 PORT = 8080
 
@@ -23,3 +17,11 @@ DEBUG = False
 
 # This sets the logging level to DEBUG.
 VERBOSE = False
+
+# MONGO informations
+MONGO_HOST = 'localhost'
+MONGO_PORT = 27017
+MONGO_DB = 'thunderpush_db'
+MONGO_TABLE = 'auth'
+MONGO_PUBLIC = 'public_key'
+MONGO_SECRET = 'secret_key'

@@ -6,7 +6,6 @@ import hashlib
 
 from sockjs.tornado import SockJSConnection
 from thunderpush.sortingstation import SortingStation
-#{"event":"pusher:subscribe","data":{"auth":"fc0d0b16b1a521721b1b:392a8ddfc21a9fa5524d64c98008d3577ef7210d44425f6aa1af0be37ae2d69e","channel":"private-admin"}}
 try:
     import simplejson as json
 except ImportError:
@@ -123,8 +122,6 @@ class ThunderSocketHandler(SockJSConnection):
         auth = args['auth']
         args.__delitem__('auth')
         msg = self.messenger.apikey + ":" + json.dumps(args).replace(': ', ':').replace(', "', ',"')
-        # logger.info("Private Key: %s" % self.messenger.apisecret.encode());
-        # logger.info("Message: %s" % msg.encode());
         signer = hmac.new(key=self.messenger.apisecret.encode(), msg=msg.encode(), digestmod=hashlib.sha256).hexdigest()
         logger.info("Validating keys: %s with %s" % (signer, auth))
         return signer == auth
