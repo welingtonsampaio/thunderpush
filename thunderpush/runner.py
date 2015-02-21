@@ -98,7 +98,7 @@ def parse_args(args):
     parser.add_argument('-mp', '--mongo-port',
         default=settings.MONGO_PORT,
         help='Port to Mongo connection',
-        action="store", dest="MONGO_PORT")
+        action="store", type=int, dest="MONGO_PORT")
 
     parser.add_argument('-md', '--mongo-db',
         default=settings.MONGO_DB,
