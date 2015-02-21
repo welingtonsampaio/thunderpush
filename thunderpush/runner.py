@@ -41,7 +41,7 @@ def run_app():
     application = tornado.web.Application(urls, settings.DEBUG)
 
     ss = SortingStation()
-    sr = StationMongo(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB, settings.MONGO_TABLE, settings.MONGO_PUBLIC, settings.MONGO_SECRET)
+    sr = StationMongo(settings.MONGO_HOST, settings.MONGO_USERNAME, settings.MONGO_PASSWORD, settings.MONGO_PORT, settings.MONGO_DB, settings.MONGO_TABLE, settings.MONGO_PUBLIC, settings.MONGO_SECRET)
 
     # Single-client only at the moment.
     # ss.create_messenger(settings.APIKEY, settings.APISECRET)
@@ -119,6 +119,16 @@ def parse_args(args):
         default=settings.MONGO_SECRET,
         help='Secret field in Mongo collection',
         action="store", dest="MONGO_SECRET")
+
+    parser.add_argument('--mongo-user',
+        default=settings.MONGO_USERNAME,
+        help='Username to Mongo connection',
+        action="store", dest="MONGO_USERNAME")
+
+    parser.add_argument('--mongo-pass',
+        default=settings.MONGO_PASSWORD,
+        help='Password to Mongo collection',
+        action="store", dest="MONGO_PASSWORD")
 
     parser.add_argument('-V', '--version', 
         action='version', version=__version__)

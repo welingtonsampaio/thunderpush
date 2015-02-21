@@ -56,15 +56,19 @@ class StationMongo:
 
     _instance = None
 
-    def __init__(self, hostname, port, db, table, public, secret):
+    def __init__(self, hostname, username, password, port, db, table, public, secret):
         if self._instance:
-            raise Exception("StationRedis already initialized.")
+            raise Exception("StationMongo already initialized.")
 
         self.table = table
         self.public = public
         self.secret = secret
-
-        client = MongoClient(hostname, port)
+        if username and password:
+            client = MongoClient(username+":"+password+"@"+hostname, port)
+        elif username and not password:
+            client = MongoClient(username+"@"+hostname, port)
+        else:
+            client = MongoClient(hostname, port)
         self.db = client[db]
         StationMongo._instance = self
 
